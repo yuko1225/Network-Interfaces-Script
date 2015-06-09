@@ -1,4 +1,5 @@
 function writeStatic(addr, nw, nm, gw) {
+	needWrite=0;
     if (length(addr))
         print "    address ", addr
   
@@ -10,6 +11,25 @@ function writeStatic(addr, nw, nm, gw) {
   
     if (length(gw))
         print "    gateway ", gw
+		
+	if (length($0)
+		print $0
+}
+
+function writeStaticIface(addr, nw, nm, gw) {
+    needWrite=0;
+	if (length(addr))
+        print "    address ", addr
+  
+    if (length(nw))
+        print "    network ", nw
+  
+    if (length(nm))
+        print "    netmask ", nm
+  
+    if (length(gw))
+        print "    gateway ", gw
+		
 }
   
 function usage() {
@@ -88,6 +108,7 @@ BEGIN { start = 0;
                 # Change to static if defined properties
                 if (length(address) || length (gateway) ||
                     length(netmask) || length (network) || static) {
+					needWrite=1;
                     print "iface", device, "inet static";
                     next;
                 }
@@ -101,6 +122,11 @@ BEGIN { start = 0;
                     sub(/ static/, " dhcp");
                     print $0;
                     next;
+				else if (length(address) || length (gateway) ||
+                    length(netmask) || length (network) || static) {
+					needWrite=1;
+                }
+				
                 }
             }
   
@@ -110,6 +136,8 @@ BEGIN { start = 0;
             definedStatic = 0;
             definedDhcp = 0;
             definedRemove = 0;
+			if (needWrite)
+				writeStaticIface(address, network, netmask, gateway);
         }
   
         if (!definedRemove) {
@@ -126,21 +154,29 @@ BEGIN { start = 0;
         # Otherwise omit everything until the iface section is
         # finished
         if (!dhcp) {
-  
+		
             if (debug)
                 print "static - ", $0, $1;
   
-            if ($1 == "address" && length(address))
-                print "    address ", address
+            if ($1 == "address" && length(address)) {
+                print "    address ", address;
+				needWrite=0;
+				}
   
-            else if ($1 == "netmask" && length(netmask))
+            else if ($1 == "netmask" && length(netmask)) {
                 print "    netmask ", netmask;
+				needWrite=0;
+				}
   
-            else if ($1 == "gateway" && length(gateway))
+            else if ($1 == "gateway" && length(gateway)) {
                 print "    gateway ", gateway;
+				needWrite=0;
+				}
   
-            else if ($1 == "network" && length(network))
+            else if ($1 == "network" && length(network)) {
                 print "    network ", network;
+				needWrite=0;
+				}
   
             else
                 print $0;

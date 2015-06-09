@@ -12,8 +12,9 @@ function writeStatic(addr, nw, nm, gw) {
     if (length(gw))
         print "    gateway ", gw
 		
-	if (length($0)
+	if (length($0))
 		print $0
+		
 }
 
 function writeStaticIface(addr, nw, nm, gw) {
@@ -122,12 +123,12 @@ BEGIN { start = 0;
                     sub(/ static/, " dhcp");
                     print $0;
                     next;
-				else if (length(address) || length (gateway) ||
+                }
+				if (length(address) || length (gateway) ||
                     length(netmask) || length (network) || static) {
 					needWrite=1;
                 }
 				
-                }
             }
   
         }
@@ -137,7 +138,7 @@ BEGIN { start = 0;
             definedDhcp = 0;
             definedRemove = 0;
 			if (needWrite)
-				writeStaticIface(address, network, netmask, gateway);
+				writeStaticIface(address, network, netmask, gateway)
         }
   
         if (!definedRemove) {
